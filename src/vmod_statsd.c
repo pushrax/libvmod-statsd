@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "vrt.h"
-#include "bin/varnishd/cache.h"
+#include "cache/cache.h"
 
 #include "vcc_if.h"
 
@@ -107,23 +107,23 @@ init_function(struct vmod_priv *priv, const struct VCL_conf *conf) {
 }
 
 /** The following may ONLY be called from VCL_init **/
-void
-vmod_prefix( struct sess *sp, struct vmod_priv *priv, const char *prefix ) {
+VCL_VOID
+vmod_prefix( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *prefix ) {
     config_t *cfg = priv->priv;
     cfg->prefix = _strip_newline( strdup( prefix ) );
 }
 
 /** The following may ONLY be called from VCL_init **/
-void
-vmod_suffix( struct sess *sp, struct vmod_priv *priv, const char *suffix ) {
+VCL_VOID
+vmod_suffix( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *suffix ) {
 
     config_t *cfg = priv->priv;
     cfg->suffix = _strip_newline( strdup( suffix ) );
 }
 
 /** The following may ONLY be called from VCL_init **/
-void
-vmod_server( struct sess *sp, struct vmod_priv *priv, const char *host, const char *port ) {
+VCL_VOID
+vmod_server( const struct vrt_ctx *ctx, struct vmod_priv *priv, VCL_STRING host, VCL_STRING port ) {
 
     // ******************************
     // Configuration
@@ -326,16 +326,16 @@ _send_to_statsd( struct vmod_priv *priv, const char *key, const char *val ) {
 }
 
 
-void
-vmod_incr( struct sess *sp, struct vmod_priv *priv, const char *key ) {
+VCL_VOID
+vmod_incr( const struct vrt_ctx *ctx, struct vmod_priv *priv, VCL_STRING key ) {
     _DEBUG && fprintf( stderr, "vmod-statsd: incr: %s\n", key );
 
     // Incremenet is straight forward - just add the count + type
     _send_to_statsd( priv, key, ":1|c" );
 }
 
-void
-vmod_timing( struct sess *sp, struct vmod_priv *priv, const char *key, int num ) {
+VCL_VOID
+vmod_timing( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *key, VCL_INT num ) {
     _DEBUG && fprintf( stderr, "vmod-statsd: timing: %s = %d\n", key, num );
 
     // Get the buffer ready. 10 for the maximum lenghth of an int and +5 for metadata
@@ -347,8 +347,8 @@ vmod_timing( struct sess *sp, struct vmod_priv *priv, const char *key, int num )
     _send_to_statsd( priv, key, val );
 }
 
-void
-vmod_counter( struct sess *sp, struct vmod_priv *priv, const char *key, int num ) {
+VCL_VOID
+vmod_counter( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *key, VCL_INT num ) {
     _DEBUG && fprintf( stderr, "vmod-statsd: counter: %s = %d\n", key, num );
 
     // Get the buffer ready. 10 for the maximum lenghth of an int and +5 for metadata
@@ -360,8 +360,8 @@ vmod_counter( struct sess *sp, struct vmod_priv *priv, const char *key, int num 
     _send_to_statsd( priv, key, val );
 }
 
-void
-vmod_gauge( struct sess *sp, struct vmod_priv *priv, const char *key, int num ) {
+VCL_VOID
+vmod_gauge( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *key, VCL_INT num ) {
     _DEBUG && fprintf( stderr, "vmod-statsd: gauge: %s = %d\n", key, num );
 
     // Get the buffer ready. 10 for the maximum lenghth of an int and +5 for metadata
@@ -372,28 +372,4 @@ vmod_gauge( struct sess *sp, struct vmod_priv *priv, const char *key, int num ) 
 
     _send_to_statsd( priv, key, val );
 }
-
-
-// const char *
-// vmod_hello(struct sess *sp, const char *name)
-// {
-// 	char *p;
-// 	unsigned u, v;
-//
-// 	u = WS_Reserve(sp->wrk->ws, 0); /* Reserve some work space */
-// 	p = sp->wrk->ws->f;		/* Front of workspace area */
-// 	v = snprintf(p, u, "Hello, %s", name);
-// 	v++;
-// 	if (v > u) {
-// 		/* No space, reset and leave */
-// 		WS_Release(sp->wrk->ws, 0);
-// 		return (NULL);
-// 	}
-// 	/* Update work space with what we've used */
-// 	WS_Release(sp->wrk->ws, v);
-// 	return (p);
-// }
-
-//     _DEBUG && fprintf( stderr, "vmod-statsd: Open: %.9f Req: %.9f Res: %.9f End: %.9f\n",
-//         sp->t_open, sp->t_req, sp->t_resp, sp->t_end );
 
