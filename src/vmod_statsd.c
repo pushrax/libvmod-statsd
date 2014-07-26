@@ -330,8 +330,15 @@ VCL_VOID
 vmod_incr( const struct vrt_ctx *ctx, struct vmod_priv *priv, VCL_STRING key ) {
     _DEBUG && fprintf( stderr, "vmod-statsd: incr: %s\n", key );
 
-    // Incremenet is straight forward - just add the count + type
+    // Increment is straightforward - just add the count + type
     _send_to_statsd( priv, key, ":1|c" );
+}
+
+VCL_VOID
+vmod_incr_count( const struct vrt_ctx *ctx, struct vmod_priv *priv, VCL_STRING key ) {
+    _DEBUG && fprintf( stderr, "vmod-statsd: incr_count: %s\n", key );
+
+    _send_to_statsd( priv, key, ":1|ct" );
 }
 
 VCL_VOID
