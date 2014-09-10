@@ -31,7 +31,9 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-Varnish Module (vmod) for sending statistics to Statsd.
+Varnish 4.x Module (vmod) for sending statistics to Statsd.
+
+See https://github.com/jib/libvmod-statsd/tree/master for Varnish 3.x version.
 
 See https://github.com/etsy/statsd for documentation on Statsd.
 
@@ -190,11 +192,7 @@ Usage::
  ./autogen.sh
 
  # Execute configure script
- ./configure VARNISHSRC=DIR [VMODDIR=DIR]
-
-`VARNISHSRC` is the directory of the Varnish source tree for which to
-compile your vmod. Both the `VARNISHSRC` and `VARNISHSRC/include`
-will be added to the include search paths for your module.
+ ./configure
 
 Optionally you can also set the vmod install directory by adding
 `VMODDIR=DIR` (defaults to the pkg-config discovered directory from your
