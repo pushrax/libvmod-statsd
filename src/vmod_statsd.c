@@ -1,7 +1,8 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "vcl.h"
 #include "vrt.h"
 #include "cache/cache.h"
 
@@ -80,7 +81,12 @@ free_function(void *priv) {
 }
 
 int
-init_function(struct vmod_priv *priv, const struct VCL_conf *conf) {
+event_function(VRT_CTX, struct vmod_priv *priv, enum vcl_event_e e)
+{
+
+  if (e != VCL_EVENT_LOAD)
+    return (0);
+
 
     // ******************************
     // Configuration defaults
@@ -108,14 +114,14 @@ init_function(struct vmod_priv *priv, const struct VCL_conf *conf) {
 
 /** The following may ONLY be called from VCL_init **/
 VCL_VOID
-vmod_prefix( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *prefix ) {
+vmod_prefix( VRT_CTX, struct vmod_priv *priv, const char *prefix ) {
     config_t *cfg = priv->priv;
     cfg->prefix = _strip_newline( strdup( prefix ) );
 }
 
 /** The following may ONLY be called from VCL_init **/
 VCL_VOID
-vmod_suffix( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *suffix ) {
+vmod_suffix( VRT_CTX, struct vmod_priv *priv, const char *suffix ) {
 
     config_t *cfg = priv->priv;
     cfg->suffix = _strip_newline( strdup( suffix ) );
@@ -123,7 +129,7 @@ vmod_suffix( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *suff
 
 /** The following may ONLY be called from VCL_init **/
 VCL_VOID
-vmod_server( const struct vrt_ctx *ctx, struct vmod_priv *priv, VCL_STRING host, VCL_STRING port ) {
+vmod_server( VRT_CTX, struct vmod_priv *priv, VCL_STRING host, VCL_STRING port ) {
 
     // ******************************
     // Configuration
@@ -327,7 +333,7 @@ _send_to_statsd( struct vmod_priv *priv, const char *key, const char *val ) {
 
 
 VCL_VOID
-vmod_incr( const struct vrt_ctx *ctx, struct vmod_priv *priv, VCL_STRING key ) {
+vmod_incr( VRT_CTX, struct vmod_priv *priv, VCL_STRING key ) {
     _DEBUG && fprintf( stderr, "vmod-statsd: incr: %s\n", key );
 
     // Incremenet is straight forward - just add the count + type
@@ -335,40 +341,40 @@ vmod_incr( const struct vrt_ctx *ctx, struct vmod_priv *priv, VCL_STRING key ) {
 }
 
 VCL_VOID
-vmod_timing( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *key, VCL_INT num ) {
-    _DEBUG && fprintf( stderr, "vmod-statsd: timing: %s = %d\n", key, num );
+vmod_timing( VRT_CTX, struct vmod_priv *priv, const char *key, VCL_INT num ) {
+    _DEBUG && fprintf( stderr, "vmod-statsd: timing: %s = %d\n", key, (int)num );
 
     // Get the buffer ready. 10 for the maximum lenghth of an int and +5 for metadata
     char val[ 15 ];
 
     // looks like glork:320|ms
-    snprintf( val, sizeof(val), ":%d|ms", num );
+    snprintf( val, sizeof(val), ":%d|ms", (int)num );
 
     _send_to_statsd( priv, key, val );
 }
 
 VCL_VOID
-vmod_counter( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *key, VCL_INT num ) {
-    _DEBUG && fprintf( stderr, "vmod-statsd: counter: %s = %d\n", key, num );
+vmod_counter( VRT_CTX, struct vmod_priv *priv, const char *key, VCL_INT num ) {
+    _DEBUG && fprintf( stderr, "vmod-statsd: counter: %s = %d\n", key, (int)num );
 
     // Get the buffer ready. 10 for the maximum lenghth of an int and +5 for metadata
     char val[ 15 ];
 
     // looks like: gorets:42|c
-    snprintf( val, sizeof(val), ":%d|c", num );
+    snprintf( val, sizeof(val), ":%d|c", (int)num );
 
     _send_to_statsd( priv, key, val );
 }
 
 VCL_VOID
-vmod_gauge( const struct vrt_ctx *ctx, struct vmod_priv *priv, const char *key, VCL_INT num ) {
-    _DEBUG && fprintf( stderr, "vmod-statsd: gauge: %s = %d\n", key, num );
+vmod_gauge( VRT_CTX, struct vmod_priv *priv, const char *key, VCL_INT num ) {
+    _DEBUG && fprintf( stderr, "vmod-statsd: gauge: %s = %d\n", key, (int)num );
 
     // Get the buffer ready. 10 for the maximum lenghth of an int and +5 for metadata
     char val[ 15 ];
 
     // looks like: gaugor:333|g
-    snprintf( val, sizeof(val), ":%d|g", num );
+    snprintf( val, sizeof(val), ":%d|g", (int)num );
 
     _send_to_statsd( priv, key, val );
 }

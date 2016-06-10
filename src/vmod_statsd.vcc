@@ -1,5 +1,5 @@
 $Module statsd 3 StatsD Client
-$Init init_function
+$Event event_function
 $Function VOID server( PRIV_VCL, STRING, STRING )
 $Function VOID prefix( PRIV_VCL, STRING )
 $Function VOID suffix( PRIV_VCL, STRING )
